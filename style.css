@@ -22,3 +22,11 @@ article{display:grid;grid-template-columns:1fr 1fr;background:#30263a;margin-top
 ul{margin:0;padding:0;list-style:none}li{padding:.8rem 0;border-top:1px solid var(--line)}li a{font-size:1.23rem;font-weight:650}small{display:block;font-size:.9rem}
 #contact{background:#bdb0ff}footer{padding:1.2rem 0}
 @media(max-width:650px){article,.about{grid-template-columns:1fr}.art{min-height:180px}.work,.section{padding:3rem 0}}
+.scope {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:#a99aac;border:1px solid #a99aac}
+.scope > div {background:var(--paper);padding:clamp(1rem,3vw,2rem)}
+.scope h3,.timeline h3 {font-size:clamp(1.6rem,3vw,2.4rem)}
+.scope p {margin:0;max-width:50ch}
+.timeline p + h3 {margin-top:1.8rem}
+.hero {border-bottom:1px solid var(--line)}
+.hero p:not(.label) {max-width:53ch}
+@media(max-width:650px){.scope{grid-template-columns:1fr}}
