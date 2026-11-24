@@ -59,3 +59,10 @@ nav{flex-wrap:wrap}
 .credential-groups summary{cursor:pointer;font-weight:700}.credential-groups summary span{float:right}
 .credential-groups ul{margin-top:.8rem}
 @media(max-width:650px){.recommendations,.credential-groups{grid-template-columns:1fr}}
+.identity,.person{display:flex;align-items:center;gap:.75rem}
+.identity{margin-bottom:1rem;font-weight:800}
+.avatar,.portrait{object-fit:cover;border-radius:50%;background:#e8ede5}
+.avatar{width:48px;height:48px}.portrait{width:64px;height:64px}
+.person{text-decoration:none;margin-bottom:.45rem}.person:hover{text-decoration:underline}
+.result{font-weight:750;color:#d6ef9b}
+#archive select{margin-top:.75rem;font:inherit;padding:.55rem;border:1px solid var(--purple);border-radius:.4rem;background:white;color:var(--ink)}
