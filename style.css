@@ -48,3 +48,14 @@ header{align-items:center;flex-wrap:wrap}
 @media(max-width:720px){#archive ul{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:1fr}}
 @media(max-width:460px){#archive ul{grid-template-columns:1fr}}
 .thumb-label {display:grid;place-items:center;text-align:center;color:var(--ink);font:400 clamp(1.35rem,3vw,2rem)/1 Georgia,serif;padding:1rem}
+.hero{padding:clamp(2.5rem,5vw,4.25rem) 0 2.5rem}
+.hero h1{font-size:clamp(2.4rem,5.8vw,5.2rem);line-height:1.02}
+.hero p:not(.label){margin-top:1rem}
+.metrics{margin-top:2rem}.metrics b{font-size:clamp(1.8rem,3vw,2.9rem)}
+nav{flex-wrap:wrap}
+.recommendations,.credential-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1.5rem 0}
+.recommendations figure,.credential-groups details{margin:0;padding:1.2rem;border:1px solid var(--line);border-radius:.85rem;background:white}
+.recommendations blockquote{margin:0 0 1rem;font-family:Georgia,serif;font-size:1.25rem;line-height:1.4}
+.credential-groups summary{cursor:pointer;font-weight:700}.credential-groups summary span{float:right}
+.credential-groups ul{margin-top:.8rem}
+@media(max-width:650px){.recommendations,.credential-groups{grid-template-columns:1fr}}
