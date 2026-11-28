@@ -1,7 +1,7 @@
 const filter = document.querySelector('#filter');
-const input = filter.querySelector('input');
+const input = filter ? filter.querySelector('input') : null; // filter is optional markup; guard every use below
 const entries = [...document.querySelectorAll('#archive li')];
-const status = document.querySelector('#status');
+const statusEl = document.querySelector('#status');
 const groups = [
   ['Product launches and education', /positioning|feature launch|product education|product video/i],
   ['Writing and research', /thought leadership|technical reporting/i],
@@ -9,24 +9,124 @@ const groups = [
   ['Demand generation', /demand generation|webinar/i],
   ['Field and brand marketing', /event|brand campaign/i]
 ];
-const select = document.createElement('select');
-select.setAttribute('aria-label', 'Filter work by category');
-select.append(new Option('All categories', ''));
-for (const [label] of groups) select.append(new Option(label, label));
-filter.after(select);
+const chips = document.querySelector('#chips');
+let activeCategory = '';
 
-function updateArchive() {
-  const query = input.value.trim().toLowerCase();
-  let matches = 0;
-  for (const entry of entries) {
-    const category = groups.find(([,pattern]) => pattern.test(entry.querySelector('small').textContent))?.[0];
-    entry.hidden = !entry.textContent.toLowerCase().includes(query) || Boolean(select.value && select.value !== category);
-    if (!entry.hidden) matches += 1;
-  }
-  status.textContent = matches === 1 ? '1 example' : matches + ' examples';
+function categoryOf(entry) {
+  const small = entry.querySelector('small');
+  return groups.find(([, pattern]) => pattern.test(small ? small.textContent : ''))?.[0] || '';
 }
 
-filter.hidden = false;
-input.addEventListener('input', updateArchive);
-select.addEventListener('change', updateArchive);
+function updateArchive() {
+  const query = input ? input.value.trim().toLowerCase() : '';
+  let matches = 0;
+  for (const entry of entries) {
+    const category = categoryOf(entry);
+    entry.hidden = !entry.textContent.toLowerCase().includes(query) || Boolean(activeCategory && activeCategory !== category);
+    if (!entry.hidden) matches += 1;
+  }
+  if (statusEl) statusEl.textContent = matches === 1 ? '1 example' : matches + ' examples';
+}
+
+if (chips) {
+  const allChip = document.createElement('button');
+  allChip.type = 'button';
+  allChip.className = 'chip';
+  allChip.textContent = 'All';
+  allChip.setAttribute('aria-pressed', 'true');
+  chips.append(allChip);
+  allChip.addEventListener('click', () => setCategory('', allChip));
+  for (const [label] of groups) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.textContent = label;
+    chip.setAttribute('aria-pressed', 'false');
+    chip.addEventListener('click', () => setCategory(label, chip));
+    chips.append(chip);
+  }
+}
+function setCategory(label, pressedChip) {
+  activeCategory = label;
+  if (chips) for (const chip of chips.children) chip.setAttribute('aria-pressed', String(chip === pressedChip));
+  updateArchive();
+}
+if (filter) filter.hidden = false;
+if (input) input.addEventListener('input', updateArchive);
 updateArchive();
+
+// Active nav highlighting
+// The hero section has no id, so also match any section carrying aria-labelledby
+const sections = [...document.querySelectorAll('main section[id], main section[aria-labelledby]')];
+const navLinks = [...document.querySelectorAll('nav a[href^="#"]')];
+if ('IntersectionObserver' in window && sections.length) {
+  const navObserver = new IntersectionObserver(entriesList => {
+    for (const entry of entriesList) {
+      if (entry.isIntersecting) {
+        const id = '#' + entry.target.id;
+        for (const link of navLinks) link.classList.toggle('active', link.getAttribute('href') === id);
+      }
+    }
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  for (const section of sections) navObserver.observe(section);
+}
+
+// Fade-in-up reveals
+const reveals = [...document.querySelectorAll('.reveal')];
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if ('IntersectionObserver' in window && !reducedMotion) {
+  const revealObserver = new IntersectionObserver(entriesList => {
+    for (const entry of entriesList) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    }
+  }, { threshold: 0.08 });
+  for (const el of reveals) revealObserver.observe(el);
+} else {
+  for (const el of reveals) el.classList.add('visible');
+}
+
+// Lightweight identity-network canvas in the hero
+const canvas = document.querySelector('#net');
+if (canvas && !reducedMotion) {
+  const ctx = canvas.getContext('2d');
+  let width, height, points = [], rafId;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const DIST = 130;
+  function resize() {
+    width = canvas.offsetWidth; height = canvas.offsetHeight;
+    canvas.width = width * DPR; canvas.height = height * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const count = Math.min(64, Math.floor(width * height / 22000));
+    points = Array.from({ length: count }, () => ({
+      x: Math.random() * width, y: Math.random() * height,
+      vx: (Math.random() - .5) * .28, vy: (Math.random() - .5) * .28
+    }));
+  }
+  function tick() {
+    ctx.clearRect(0, 0, width, height);
+    for (const p of points) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > width) p.vx *= -1;
+      if (p.y < 0 || p.y > height) p.vy *= -1;
+    }
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const a = points[i], b = points[j];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < DIST) {
+          ctx.strokeStyle = 'rgba(95,227,212,' + (0.14 * (1 - d / DIST)) + ')';
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+      ctx.fillStyle = 'rgba(95,227,212,.5)';
+      ctx.beginPath(); ctx.arc(points[i].x, points[i].y, 1.3, 0, Math.PI * 2); ctx.fill();
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+  resize();
+  tick();
+  window.addEventListener('resize', () => { cancelAnimationFrame(rafId); resize(); tick(); });
+}
