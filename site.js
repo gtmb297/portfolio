@@ -88,6 +88,12 @@ if ('IntersectionObserver' in window && !reducedMotion) {
   for (const el of reveals) el.classList.add('visible');
 }
 
+// Photos fall back to the monogram or initials if they fail to load
+for (const img of document.querySelectorAll('img.portrait, .avatar img')) {
+  if (img.complete && img.naturalWidth === 0) img.remove();
+  else img.addEventListener('error', () => img.remove());
+}
+
 // Lightweight identity-network canvas in the hero
 const canvas = document.querySelector('#net');
 if (canvas && !reducedMotion) {
